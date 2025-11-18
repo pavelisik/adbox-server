@@ -1,0 +1,73 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String   @id @default(uuid())
+  login          String   @unique
+  name           String?
+  passwordHash   String
+  role           String?  @default("user")
+  registeredTime DateTime @default(now())
+
+  Adverts  Advert[]
+  Comments Comment[]
+}
+
+model Category {
+  id       String     @id @default(uuid())
+  name     String?
+  parentId String?
+  parent   Category?  @relation("CategoryToParent", fields: [parentId], references: [id])
+  children Category[] @relation("CategoryToParent")
+
+  Adverts  Advert[]
+}
+
+model Advert {
+  id          String    @id @default(uuid())
+  name        String?
+  description String?
+  cost        Float
+  email       String?
+  phone       String?
+  location    String?
+  createdAt   DateTime  @default(now())
+  isActive    Boolean   @default(true)
+
+  categoryId  String
+  Category    Category  @relation(fields: [categoryId], references: [id])
+
+  userId      String?
+  User        User?     @relation(fields: [userId], references: [id])
+
+  Images      Image[]
+  Comments    Comment[]
+}
+
+model Image {
+  id       String  @id @default(uuid())
+  url      String?
+  advertId String
+  Advert   Advert  @relation(fields: [advertId], references: [id])
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  text      String?
+  created   DateTime @default(now())
+  parentId  String?
+  Parent    Comment?  @relation("CommentToParent", fields: [parentId], references: [id])
+  Children  Comment[] @relation("CommentToParent")
+
+  advertId  String
+  Advert    Advert   @relation(fields: [advertId], references: [id])
+
+  userId    String
+  User      User     @relation(fields: [userId], references: [id])
+}

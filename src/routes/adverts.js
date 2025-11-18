@@ -1,16 +1,20 @@
 const express = require('express');
 const { prisma } = require('../prisma');
+const { v4: uuidv4 } = require('uuid');
 const multer = require('multer');
+const path = require('path');
 
 const router = express.Router();
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'uploads/adverts'); // куда сохранять
+        cb(null, 'uploads/images');
     },
     filename: (req, file, cb) => {
-        const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
-        cb(null, unique + '-' + file.originalname);
+        const id = uuidv4();
+        file.generatedId = id; // сохраняем id в объект файла
+        const ext = path.extname(file.originalname); // берем расширение из оригинального имени
+        cb(null, `${id}${ext}`); // имя файла = id + оригинальное расширение
     },
 });
 
@@ -134,12 +138,14 @@ router.post(
 
             // записываем изображения в БД
             const createdImages = [];
+
             if (images && images.length > 0) {
                 for (const file of images) {
                     const saved = await prisma.image.create({
                         data: {
+                            id: file.generatedId,
                             advertId: advert.id,
-                            url: `/uploads/adverts/${file.filename}`,
+                            url: `/uploads/images/${file.filename}`,
                         },
                     });
                     createdImages.push(saved.id);

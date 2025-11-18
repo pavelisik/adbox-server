@@ -14,6 +14,8 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
+app.use('/uploads', express.static('uploads'));
+
 app.use('/Advert', advertsRouter);
 app.use('/Authorization', authRouter);
 app.use('/Categories', categoriesRouter);

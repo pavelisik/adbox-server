@@ -1,18 +1,17 @@
-const express = require('express');
-const cors = require('cors');
-const bodyParser = require('body-parser');
+import express from 'express';
+import cors from 'cors';
 
-const advertsRouter = require('./routes/adverts');
-const authRouter = require('./routes/auth');
-const categoriesRouter = require('./routes/categories');
-const commentsRouter = require('./routes/comments');
-const imagesRouter = require('./routes/images');
-const usersRouter = require('./routes/users');
+import advertsRouter from './routes/adverts.js';
+import authRouter from './routes/auth.js';
+import categoriesRouter from './routes/categories.js';
+import commentsRouter from './routes/comments.js';
+import imagesRouter from './routes/images.js';
+import usersRouter from './routes/users.js';
 
 const app = express();
 
 app.use(cors());
-app.use(bodyParser.json());
+app.use(express.json());
 
 app.use('/uploads', express.static('uploads'));
 

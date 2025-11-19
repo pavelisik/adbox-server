@@ -1,8 +1,8 @@
-const express = require('express');
-const { prisma } = require('../prisma');
-const multer = require('multer');
+import { Router } from 'express';
+import prisma from '../prisma.js';
+import multer from 'multer';
 
-const router = express.Router();
+const router = Router();
 const upload = multer();
 
 // проверка form-data
@@ -162,4 +162,4 @@ router.post('/import', async (req, res) => {
     }
 });
 
-module.exports = router;
+export default router;

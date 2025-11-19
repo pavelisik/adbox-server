@@ -1,19 +1,19 @@
-const express = require('express');
-const { prisma } = require('../prisma');
-const { v4: uuidv4 } = require('uuid');
-const multer = require('multer');
-const path = require('path');
+import { Router } from 'express';
+import prisma from '../prisma.js';
+import { v4 as uuidv4 } from 'uuid';
+import multer, { diskStorage } from 'multer';
+import { extname } from 'path';
 
-const router = express.Router();
+const router = Router();
 
-const storage = multer.diskStorage({
+const storage = diskStorage({
     destination: (req, file, cb) => {
         cb(null, 'uploads/images');
     },
     filename: (req, file, cb) => {
         const id = uuidv4();
         file.generatedId = id; // сохраняем id в объект файла
-        const ext = path.extname(file.originalname); // берем расширение из оригинального имени
+        const ext = extname(file.originalname); // берем расширение из оригинального имени
         cb(null, `${id}${ext}`); // имя файла = id + оригинальное расширение
     },
 });
@@ -38,12 +38,7 @@ router.post('/search', async (req, res) => {
             where: {
                 isActive: showNonActive ? undefined : true,
                 categoryId: category || undefined,
-                OR: search
-                    ? [
-                          { name: { contains: search, mode: 'insensitive' } },
-                          { description: { contains: search, mode: 'insensitive' } },
-                      ]
-                    : undefined,
+                OR: search ? [{ name: { contains: search, mode: 'insensitive' } }, { description: { contains: search, mode: 'insensitive' } }] : undefined,
             },
         });
 
@@ -92,9 +87,7 @@ router.get('/:id', async (req, res) => {
             phone: ad.phone,
             location: ad.location,
             created: ad.createdAt,
-            category: ad.Category
-                ? { id: ad.Category.id, parentId: ad.Category.parentId, name: ad.Category.name }
-                : null,
+            category: ad.Category ? { id: ad.Category.id, parentId: ad.Category.parentId, name: ad.Category.name } : null,
         };
 
         res.json(result);
@@ -297,4 +290,4 @@ router.post('/:id/comments', async (req, res) => {
     }
 });
 
-module.exports = router;
+export default router;

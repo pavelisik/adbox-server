@@ -1,7 +1,7 @@
-const express = require('express');
-const bcrypt = require('bcrypt');
-const { prisma } = require('../prisma');
-const router = express.Router();
+import { Router } from 'express';
+import { hash } from 'bcrypt';
+import prisma from '../prisma.js';
+const router = Router();
 
 // GET /Users — получить всех пользователей
 router.get('/', async (req, res) => {
@@ -57,13 +57,12 @@ router.put('/:id', async (req, res) => {
         const { Name, Login, Password } = req.body;
         const userId = req.params.id;
 
-        if (!Name || !Login || !Password)
-            return res.status(400).json({ userMessage: 'Invalid model', errorCode: '400' });
+        if (!Name || !Login || !Password) return res.status(400).json({ userMessage: 'Invalid model', errorCode: '400' });
 
         const userExists = await prisma.user.findUnique({ where: { id: userId } });
         if (!userExists) return res.status(404).json({ userMessage: 'User not found', errorCode: '404' });
 
-        const passwordHash = await bcrypt.hash(Password, 10);
+        const passwordHash = await hash(Password, 10);
 
         const updatedUser = await prisma.user.update({
             where: { id: userId },
@@ -98,4 +97,4 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
-module.exports = router;
+export default router;

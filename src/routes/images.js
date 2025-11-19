@@ -1,7 +1,7 @@
-const express = require('express');
-const { prisma } = require('../prisma');
-const multer = require('multer');
-const router = express.Router();
+import { Router } from 'express';
+import prisma from '../prisma.js';
+import multer from 'multer';
+const router = Router();
 
 const upload = multer(); // для multipart/form-data
 
@@ -29,8 +29,7 @@ router.post('/', upload.single('Content'), async (req, res) => {
         const { AdvertId } = req.body;
         const file = req.file;
 
-        if (!AdvertId || !file)
-            return res.status(400).json({ userMessage: 'AdvertId and Content are required', errorCode: '400' });
+        if (!AdvertId || !file) return res.status(400).json({ userMessage: 'AdvertId and Content are required', errorCode: '400' });
 
         const advert = await prisma.advert.findUnique({ where: { id: AdvertId } });
         if (!advert) return res.status(422).json({ userMessage: 'Advert not found', errorCode: '422' });
@@ -71,4 +70,4 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
-module.exports = router;
+export default router;

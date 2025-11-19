@@ -1,9 +1,9 @@
-const express = require('express');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const { prisma } = require('../prisma');
+import { Router } from 'express';
+import { hash, compare } from 'bcrypt';
+import sign from 'jsonwebtoken';
+import prisma from '../prisma.js';
 
-const router = express.Router();
+const router = Router();
 const SECRET = 'dev-secret';
 
 // POST /Auth/Register
@@ -17,21 +17,14 @@ router.post('/Register', async (req, res) => {
         }
 
         // Проверка длины полей (согласно Swagger)
-        if (
-            login.length < 4 ||
-            login.length > 64 ||
-            name.length < 4 ||
-            name.length > 64 ||
-            password.length < 8 ||
-            password.length > 50
-        ) {
+        if (login.length < 4 || login.length > 64 || name.length < 4 || name.length > 64 || password.length < 8 || password.length > 50) {
             return res.status(400).json({ userMessage: 'Fields do not meet length requirements', errorCode: '400' });
         }
 
         const exists = await prisma.user.findUnique({ where: { login } });
         if (exists) return res.status(422).json({ userMessage: 'Login already taken', errorCode: '422' });
 
-        const passwordHash = await bcrypt.hash(password, 10);
+        const passwordHash = await hash(password, 10);
 
         await prisma.user.create({
             data: { login, name, passwordHash },
@@ -57,11 +50,11 @@ router.post('/Login', async (req, res) => {
         const user = await prisma.user.findUnique({ where: { login } });
         if (!user) return res.status(400).json({ userMessage: 'Invalid credentials', errorCode: '400' });
 
-        const ok = await bcrypt.compare(password, user.passwordHash);
+        const ok = await compare(password, user.passwordHash);
         if (!ok) return res.status(400).json({ userMessage: 'Invalid credentials', errorCode: '400' });
 
         // Генерация JWT токена
-        const token = jwt.sign({ sub: user.id, role: user.role }, SECRET, {
+        const token = sign({ sub: user.id, role: user.role }, SECRET, {
             expiresIn: '7d',
         });
 
@@ -72,4 +65,4 @@ router.post('/Login', async (req, res) => {
     }
 });
 
-module.exports = router;
+export default router;

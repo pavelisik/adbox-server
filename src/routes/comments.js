@@ -1,7 +1,7 @@
-const express = require('express');
-const { prisma } = require('../prisma');
+import { Router } from 'express';
+import prisma from '../prisma.js';
 
-const router = express.Router();
+const router = Router();
 
 // GET /Comment/:id — получить комментарий по ID
 router.get('/:id', async (req, res) => {
@@ -62,4 +62,4 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
-module.exports = router;
+export default router;
